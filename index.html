@@ -1,11 +1,11 @@
 from pathlib import Path
 
-html = r'''<!DOCTYPE html>
+html = r"""<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Real Jenga Night Game</title>
+  <title>Jenga Night Game</title>
   <style>
     :root{
       --bg1:#0f1020;
@@ -17,7 +17,6 @@ html = r'''<!DOCTYPE html>
       --pink:#ff4fa3;
       --sky:#72d9ff;
       --gold:#ffc85b;
-      --danger:#ff8a80;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -29,30 +28,32 @@ html = r'''<!DOCTYPE html>
         radial-gradient(circle at 15% 10%, rgba(255,79,163,.14), transparent 25%),
         radial-gradient(circle at 85% 15%, rgba(114,217,255,.12), transparent 28%),
         linear-gradient(180deg, var(--bg2), var(--bg1));
-      overflow:hidden;
     }
     .app{
       display:grid;
-      grid-template-columns:minmax(380px, 1fr) 360px;
-      height:100%;
+      grid-template-columns:minmax(420px, 1fr) 360px;
+      min-height:100vh;
       gap:16px;
       padding:16px;
     }
     .stage{
       position:relative;
-      min-width:0;
+      min-height:760px;
       border:1px solid var(--line);
       border-radius:24px;
       overflow:hidden;
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,79,163,.08), transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(114,217,255,.08), transparent 35%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
       box-shadow:0 18px 60px rgba(0,0,0,.26);
     }
     #scene{
       width:100%;
       height:100%;
       display:block;
-      touch-action:none;
       cursor:grab;
+      touch-action:none;
     }
     #scene:active{cursor:grabbing}
     .stage-hud{
@@ -73,14 +74,12 @@ html = r'''<!DOCTYPE html>
       background:rgba(15,16,32,.45);
       backdrop-filter:blur(10px);
       font-size:13px;
-      letter-spacing:.02em;
       color:#fff;
     }
     .sidebar{
       display:flex;
       flex-direction:column;
       gap:14px;
-      min-height:0;
     }
     .panel{
       background:var(--panel);
@@ -89,9 +88,6 @@ html = r'''<!DOCTYPE html>
       padding:16px;
       box-shadow:0 14px 40px rgba(0,0,0,.18);
       backdrop-filter:blur(14px);
-    }
-    .title{
-      padding:18px 18px 16px;
     }
     .title h1{
       margin:0;
@@ -114,23 +110,14 @@ html = r'''<!DOCTYPE html>
       border:1px solid rgba(255,255,255,.08);
       border-radius:20px;
     }
-    .turn .k{
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:4px;
-    }
-    .turn .v{
-      font-size:28px;
-      font-weight:bold;
-      letter-spacing:-.03em;
-    }
+    .turn .k{font-size:12px;color:var(--muted);margin-bottom:4px}
+    .turn .v{font-size:28px;font-weight:bold;letter-spacing:-.03em}
     .avatar{
       width:60px;height:60px;border-radius:50%;
       display:grid;place-items:center;
       background:rgba(255,255,255,.08);
       border:1px solid rgba(255,255,255,.12);
       font-size:22px;font-weight:bold;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
       flex:none;
     }
     .stats{
@@ -144,15 +131,8 @@ html = r'''<!DOCTYPE html>
       background:rgba(255,255,255,.045);
       padding:14px;
     }
-    .stat .k{
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
-    .stat .v{
-      font-size:24px;
-      font-weight:bold;
-    }
+    .stat .k{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .stat .v{font-size:24px;font-weight:bold}
     .mission{
       display:flex;
       flex-direction:column;
@@ -194,7 +174,6 @@ html = r'''<!DOCTYPE html>
       padding:14px 16px;
       font-size:15px;
       font-weight:bold;
-      letter-spacing:-.01em;
       transition:transform .08s ease, filter .18s ease;
     }
     button:hover{filter:brightness(1.04)}
@@ -203,12 +182,8 @@ html = r'''<!DOCTYPE html>
     .btn-sky{background:linear-gradient(135deg, #4d92ff, var(--sky)); color:#fff}
     .btn-gold{background:linear-gradient(135deg, #ffd977, var(--gold)); color:#271900}
     .btn-muted{background:rgba(255,255,255,.08); border:1px solid var(--line); color:#fff}
-    .small{
-      font-size:12px; color:var(--muted); line-height:1.6;
-    }
-    .recent{
-      display:flex; flex-wrap:wrap; gap:8px;
-    }
+    .small{font-size:12px; color:var(--muted); line-height:1.6}
+    .recent{display:flex; flex-wrap:wrap; gap:8px}
     .chip{
       padding:8px 10px;
       border-radius:999px;
@@ -224,20 +199,18 @@ html = r'''<!DOCTYPE html>
       100%{transform:scale(1)}
     }
     @media (max-width: 1040px){
-      body{overflow:auto}
       .app{
         grid-template-columns:1fr;
-        grid-template-rows:minmax(56vh, 66vh) auto;
-        height:auto;
       }
-      .sidebar{padding-bottom:24px}
+      .stage{min-height:560px}
     }
     @media (max-width: 680px){
       .app{padding:12px; gap:12px}
-      .panel,.title{border-radius:20px}
+      .panel{border-radius:20px}
       .mission-text{font-size:21px; min-height:100px}
       .turn .v{font-size:24px}
       .stat .v{font-size:22px}
+      .stage{min-height:460px}
     }
   </style>
 </head>
@@ -246,15 +219,15 @@ html = r'''<!DOCTYPE html>
     <section class="stage">
       <canvas id="scene"></canvas>
       <div class="stage-hud">
-        <div class="pill">🪵 진짜 젠가처럼 뽑고 위에 올리는 방식</div>
-        <div class="pill">드래그로 시점 회전 · 클릭으로 블록 선택</div>
+        <div class="pill">🪵 외부 라이브러리 없이 바로 보이는 버전</div>
+        <div class="pill">드래그로 회전 · 클릭으로 블록 선택</div>
       </div>
     </section>
 
     <aside class="sidebar">
       <div class="panel title">
         <h1>젠가 술게임</h1>
-        <p>참여자 고정: <strong>나라니</strong>, <strong>이코</strong>. 실제 젠가처럼 블록을 뽑은 뒤 맨 위에 올려 쌓도록 만들었어. 완전한 물리 엔진은 아니지만, 이전 버전보다 훨씬 더 실제 젠가 흐름에 가깝게 동작해.</p>
+        <p>참여자 고정: <strong>나라니</strong>, <strong>이코</strong>. 이번 버전은 외부 3D 라이브러리 없이 바로 렌더링되도록 다시 만들었어. 블록을 뽑으면 실제 젠가처럼 맨 위에 다시 올려 쌓여.</p>
       </div>
 
       <div class="panel">
@@ -291,7 +264,7 @@ html = r'''<!DOCTYPE html>
       <div class="panel mission" id="missionCard">
         <div class="tag" id="missionTag">준비 완료</div>
         <div class="mission-text" id="missionText">탑에서 밝게 표시되는 블록을 하나 눌러 시작해.</div>
-        <div class="mission-sub" id="missionSub">실제 젠가 규칙처럼 최상단의 완성 층 아래 블록들만 뽑히게 제한했어. 블록을 뽑으면 자동으로 맨 위에 다시 올라가.</div>
+        <div class="mission-sub" id="missionSub">실제 젠가 규칙처럼 최상단의 완성 층 아래 블록들만 뽑히게 제한했어. 블록을 뽑으면 자동으로 맨 위에 다시 올라간다.</div>
       </div>
 
       <div class="panel">
@@ -302,7 +275,7 @@ html = r'''<!DOCTYPE html>
           <button class="btn-muted" id="resetBtn">처음부터</button>
         </div>
         <div class="small" style="margin-top:10px;">
-          팁: 밝게 반짝이는 블록이 현재 뽑을 수 있는 블록이야. 가운데 블록도 뽑히긴 하지만, 시각적으로 더 불안정해 보이도록 연출했어.
+          팁: 밝게 빛나는 블록이 현재 뽑을 수 있는 블록이야. 드래그해서 각도를 돌려보면 클릭하기 더 편해.
         </div>
       </div>
 
@@ -315,11 +288,7 @@ html = r'''<!DOCTYPE html>
     </aside>
   </div>
 
-  <script type="module">
-    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
-    import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
-    import { RoundedBoxGeometry } from "https://unpkg.com/three@0.160.0/examples/jsm/geometries/RoundedBoxGeometry.js";
-
+  <script>
     const PLAYERS = ["나라니", "이코"];
     let currentPlayerIndex = 0;
     let level = 1;
@@ -416,42 +385,24 @@ html = r'''<!DOCTYPE html>
     const recentEl = document.getElementById("recent");
     const missionCard = document.getElementById("missionCard");
 
-    function currentPlayer() {
-      return PLAYERS[currentPlayerIndex];
-    }
-
-    function nextPlayer() {
-      currentPlayerIndex = (currentPlayerIndex + 1) % PLAYERS.length;
-      updatePlayerUI();
-    }
-
+    function currentPlayer() { return PLAYERS[currentPlayerIndex]; }
+    function nextPlayer() { currentPlayerIndex = (currentPlayerIndex + 1) % PLAYERS.length; updatePlayerUI(); }
     function updatePlayerUI() {
       const name = currentPlayer();
       currentPlayerEl.textContent = name;
       avatarEl.textContent = name[0];
     }
-
-    function getLevelIndex(arr) {
-      return Math.min(level - 1, arr.length - 1);
-    }
-
-    function randItem(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
+    function randItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function getLevelIndex(arr) { return Math.min(level - 1, arr.length - 1); }
 
     function addRecent(text) {
-      if (recentEl.children.length === 1 && recentEl.children[0].textContent === "아직 없음") {
-        recentEl.innerHTML = "";
-      }
+      if (recentEl.children.length === 1 && recentEl.children[0].textContent === "아직 없음") recentEl.innerHTML = "";
       const chip = document.createElement("div");
       chip.className = "chip";
       chip.textContent = text;
       recentEl.prepend(chip);
-      while (recentEl.children.length > 8) {
-        recentEl.removeChild(recentEl.lastChild);
-      }
+      while (recentEl.children.length > 8) recentEl.removeChild(recentEl.lastChild);
     }
-
     function setMission(type, text, sub="") {
       modeEl.textContent = type;
       missionTagEl.textContent = `${type} · ${currentPlayer()}`;
@@ -461,13 +412,12 @@ html = r'''<!DOCTYPE html>
       void missionCard.offsetWidth;
       missionCard.classList.add("pulse");
     }
-
     function updateProgress() {
-      moves += 1;
-      count += 1;
+      moves++;
+      count++;
       if (count >= 10) {
         count = 0;
-        level += 1;
+        level++;
         missionSubEl.textContent = `🔥 레벨업! 이제 Level ${level}. 질문과 도전이 더 짜릿해졌어.`;
       }
       levelEl.textContent = String(level);
@@ -475,264 +425,81 @@ html = r'''<!DOCTYPE html>
       movesEl.textContent = String(moves);
     }
 
-    // --- THREE SETUP ---
     const canvas = document.getElementById("scene");
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    const ctx = canvas.getContext("2d");
 
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x121426, 20, 42);
-
-    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-    camera.position.set(7, 8.8, 9.6);
-
-    const controls = new OrbitControls(camera, canvas);
-    controls.enableDamping = true;
-    controls.enablePan = false;
-    controls.minDistance = 8;
-    controls.maxDistance = 16;
-    controls.minPolarAngle = 0.65;
-    controls.maxPolarAngle = 1.28;
-    controls.target.set(0, 5, 0);
-
-    const hemi = new THREE.HemisphereLight(0xbfd7ff, 0x3d2a1b, 1.05);
-    scene.add(hemi);
-
-    const dir = new THREE.DirectionalLight(0xfff4df, 2.2);
-    dir.position.set(6, 12, 5);
-    dir.castShadow = true;
-    dir.shadow.mapSize.set(2048, 2048);
-    dir.shadow.camera.near = 1;
-    dir.shadow.camera.far = 30;
-    dir.shadow.camera.left = -10;
-    dir.shadow.camera.right = 10;
-    dir.shadow.camera.top = 10;
-    dir.shadow.camera.bottom = -10;
-    scene.add(dir);
-
-    const fill = new THREE.DirectionalLight(0x7bcfff, 0.8);
-    fill.position.set(-7, 8, -6);
-    scene.add(fill);
-
-    const ambientGlow = new THREE.PointLight(0xff4fa3, 0.7, 18, 2);
-    ambientGlow.position.set(3, 7, 3);
-    scene.add(ambientGlow);
-
-    const floorGeo = new THREE.CircleGeometry(11, 96);
-    const floorMat = new THREE.MeshStandardMaterial({
-      color:0x20192e,
-      roughness:0.88,
-      metalness:0.02
-    });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.02;
-    floor.receiveShadow = true;
-    scene.add(floor);
-
-    const ringGeo = new THREE.RingGeometry(6.8, 8.5, 64);
-    const ringMat = new THREE.MeshBasicMaterial({
-      color:0x5b2f6b,
-      transparent:true,
-      opacity:0.35,
-      side:THREE.DoubleSide
-    });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = -Math.PI/2;
-    ring.position.y = 0.01;
-    scene.add(ring);
-
-    function createWoodTexture() {
-      const c = document.createElement("canvas");
-      c.width = 1024;
-      c.height = 256;
-      const ctx = c.getContext("2d");
-
-      const g = ctx.createLinearGradient(0,0,1024,0);
-      g.addColorStop(0, "#b8814a");
-      g.addColorStop(0.18, "#9a6333");
-      g.addColorStop(0.38, "#c38b57");
-      g.addColorStop(0.65, "#916032");
-      g.addColorStop(1, "#c99059");
-      ctx.fillStyle = g;
-      ctx.fillRect(0,0,c.width,c.height);
-
-      for (let i=0; i<180; i++) {
-        const y = Math.random() * c.height;
-        const h = 1 + Math.random() * 2;
-        ctx.fillStyle = `rgba(90,52,24,${0.07 + Math.random()*0.14})`;
-        ctx.fillRect(0, y, c.width, h);
-      }
-      for (let i=0; i<28; i++) {
-        const x = Math.random() * c.width;
-        ctx.strokeStyle = `rgba(70,34,14,${0.08 + Math.random()*0.08})`;
-        ctx.lineWidth = 2 + Math.random()*3;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        for (let j=0; j<=8; j++) {
-          const px = x + j * 120 + (Math.random()-0.5) * 32;
-          const py = (j/8) * c.height;
-          ctx.lineTo(px, py);
-        }
-        ctx.stroke();
-      }
-      for (let i=0; i<1200; i++) {
-        ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.03})`;
-        ctx.fillRect(Math.random()*c.width, Math.random()*c.height, 1, 1);
-      }
-
-      const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(1.8, 1.0);
-      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-      tex.colorSpace = THREE.SRGBColorSpace;
-      return tex;
-    }
-
-    const woodTexture = createWoodTexture();
-    const blockGeo = new RoundedBoxGeometry(3, 0.6, 1, 6, 0.08);
-
-    function createBlockMaterials() {
-      const mats = [];
-      for (let i=0; i<6; i++) {
-        mats.push(new THREE.MeshStandardMaterial({
-          map: woodTexture,
-          color: i < 4 ? 0xffffff : 0xf3e2c8,
-          roughness:0.62,
-          metalness:0.03
-        }));
-      }
-      return mats;
-    }
-
-    const towerGroup = new THREE.Group();
-    scene.add(towerGroup);
-
-    const blocks = [];
-    const LAYER_HEIGHT = 0.62;
-    const SLOT_GAP = 1.01;
-    const towerState = {
-      maxLayer: 0,
-      nextPlacementLayer: 0,
-      nextPlacementSlot: 0,
-      nextPlacementOrientation: "z"
+    const WORLD = { bw: 3.0, bh: 0.62, bd: 1.0, gap: 1.02 };
+    const tower = [];
+    const state = {
+      yaw: -0.75,
+      hoverId: null,
+      dragging: false,
+      dragMoved: false,
+      dragStartX: 0,
+      dragStartYaw: 0,
+      moveBlock: null,
+      moveStart: 0,
+      moveDuration: 900,
+      nextLayer: 8,
+      nextSlot: 0,
+      nextOri: "z",
     };
 
-    function blockPosition(layer, slot, orientation) {
-      const y = layer * LAYER_HEIGHT + 0.3;
-      if (orientation === "x") {
-        return new THREE.Vector3((slot - 1) * SLOT_GAP, y, 0);
-      } else {
-        return new THREE.Vector3(0, y, (slot - 1) * SLOT_GAP);
-      }
+    function initialPos(layer, slot, ori) {
+      const y = layer * WORLD.bh + WORLD.bh / 2;
+      if (ori === "x") return { x: (slot - 1) * WORLD.gap, y, z: 0 };
+      return { x: 0, y, z: (slot - 1) * WORLD.gap };
     }
 
-    function resetPlacementPointers() {
-      const layers = {};
-      blocks.forEach(b => {
-        if (!b.userData.active) return;
-        const l = b.userData.layer;
-        layers[l] = (layers[l] || 0) + 1;
-      });
-      const topLayer = Math.max(...Object.keys(layers).map(Number));
-      const topCount = layers[topLayer];
-      if (topCount < 3) {
-        towerState.nextPlacementLayer = topLayer;
-        towerState.nextPlacementSlot = topCount;
-        towerState.nextPlacementOrientation = (topLayer % 2 === 0) ? "x" : "z";
-      } else {
-        towerState.nextPlacementLayer = topLayer + 1;
-        towerState.nextPlacementSlot = 0;
-        towerState.nextPlacementOrientation = ((topLayer + 1) % 2 === 0) ? "x" : "z";
-      }
-      towerState.maxLayer = Math.max(topLayer, towerState.nextPlacementLayer);
-    }
-
-    function buildInitialTower() {
-      while (towerGroup.children.length) {
-        towerGroup.remove(towerGroup.children[0]);
-      }
-      blocks.length = 0;
-
-      const initialLayers = 8;
-      for (let layer = 0; layer < initialLayers; layer++) {
-        const orientation = layer % 2 === 0 ? "x" : "z";
+    function createTower() {
+      tower.length = 0;
+      for (let layer = 0; layer < 8; layer++) {
+        const ori = layer % 2 === 0 ? "x" : "z";
         for (let slot = 0; slot < 3; slot++) {
-          const mesh = new THREE.Mesh(blockGeo, createBlockMaterials());
-          mesh.castShadow = true;
-          mesh.receiveShadow = true;
-          mesh.position.copy(blockPosition(layer, slot, orientation));
-          if (orientation === "z") {
-            mesh.rotation.y = Math.PI / 2;
-          }
-          mesh.userData = {
+          const p = initialPos(layer, slot, ori);
+          tower.push({
             id: `L${layer+1}-${slot+1}`,
-            layer,
-            slot,
-            orientation,
-            active:true,
-            moving:false,
-            eligible:false,
-            baseEmissive: new THREE.Color(0x000000)
-          };
-          towerGroup.add(mesh);
-          blocks.push(mesh);
+            layer, slot, ori,
+            x: p.x, y: p.y, z: p.z,
+            active: true,
+            eligible: false,
+            moving: false,
+            selected: false
+          });
         }
       }
-      resetPlacementPointers();
-      updateEligibleBlocks();
+      state.nextLayer = 8;
+      state.nextSlot = 0;
+      state.nextOri = "z";
+      updateEligible();
+      draw();
     }
 
-    function layerCounts() {
-      const counts = {};
-      blocks.forEach(b => {
-        if (!b.userData.active) return;
-        counts[b.userData.layer] = (counts[b.userData.layer] || 0) + 1;
+    function countsByLayer() {
+      const m = new Map();
+      tower.forEach(b => {
+        if (!b.active) return;
+        m.set(b.layer, (m.get(b.layer) || 0) + 1);
       });
-      return counts;
+      return m;
     }
 
     function highestCompleteLayer() {
-      const counts = layerCounts();
-      const layers = Object.keys(counts).map(Number).sort((a,b)=>a-b);
-      let highest = -1;
-      layers.forEach(l => {
-        if (counts[l] === 3) highest = l;
-      });
-      return highest;
+      const counts = countsByLayer();
+      let h = -1;
+      [...counts.keys()].sort((a,b)=>a-b).forEach(l => { if (counts.get(l) === 3) h = l; });
+      return h;
     }
 
-    function updateEligibleBlocks() {
-      const highestComplete = highestCompleteLayer();
-      blocks.forEach(mesh => {
-        if (!mesh.userData.active || mesh.userData.moving) {
-          mesh.userData.eligible = false;
-          setBlockHighlight(mesh, 0);
-          return;
-        }
-        const layer = mesh.userData.layer;
-        const counts = layerCounts();
-        const eligible = layer < highestComplete && counts[layer] > 1;
-        mesh.userData.eligible = eligible;
-        setBlockHighlight(mesh, eligible ? 0.16 : 0);
+    function updateEligible() {
+      const topComplete = highestCompleteLayer();
+      const counts = countsByLayer();
+      tower.forEach(b => {
+        b.eligible = b.active && !b.moving && b.layer < topComplete && (counts.get(b.layer) || 0) > 1;
       });
-
-      const eligible = blocks.filter(b => b.userData.eligible);
-      if (eligible.length) {
-        const recommended = eligible[Math.floor(Math.random()*eligible.length)];
-        setBlockHighlight(recommended, 0.28);
-      }
-    }
-
-    function setBlockHighlight(mesh, strength) {
-      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      materials.forEach(mat => {
-        if (!mat.emissive) return;
-        mat.emissive.setRGB(0.95 * strength, 0.30 * strength, 0.65 * strength);
-        mat.emissiveIntensity = strength > 0 ? 1.2 : 0;
-      });
+      const eligible = tower.filter(b => b.eligible);
+      eligible.forEach(b => b.selected = false);
+      if (eligible.length) randItem(eligible).selected = true;
     }
 
     function pickMissionType() {
@@ -740,146 +507,292 @@ html = r'''<!DOCTYPE html>
       return Math.random() < truthChance ? "TRUTH" : "DARE";
     }
 
-    function animateBlockToTop(block) {
-      if (animating) return;
-      animating = true;
-      block.userData.moving = true;
-      updateEligibleBlocks();
+    function project(x, y, z, yaw) {
+      const cy = Math.cos(yaw), sy = Math.sin(yaw);
+      const rx = x * cy - z * sy;
+      const rz = x * sy + z * cy;
+      const scale = Math.min(canvas.width, canvas.height) * 0.12;
+      const px = canvas.width * 0.44 + rx * scale;
+      const py = canvas.height * 0.86 - y * scale - rz * scale * 0.40;
+      return { x: px, y: py, depth: rz + y * 0.05 };
+    }
 
-      const startPos = block.position.clone();
-      const startRot = block.rotation.y;
-      const startOrientation = block.userData.orientation;
+    function blockVertices(b) {
+      const hw = b.ori === "x" ? WORLD.bw / 2 : WORLD.bd / 2;
+      const hd = b.ori === "x" ? WORLD.bd / 2 : WORLD.bw / 2;
+      const hh = WORLD.bh / 2;
+      const pts = [
+        [-hw,-hh,-hd],[ hw,-hh,-hd],[ hw, hh,-hd],[-hw, hh,-hd],
+        [-hw,-hh, hd],[ hw,-hh, hd],[ hw, hh, hd],[-hw, hh, hd]
+      ];
+      return pts.map(([x,y,z]) => project(b.x + x, b.y + y, b.z + z, state.yaw));
+    }
 
-      let pullDir = new THREE.Vector3();
-      if (startOrientation === "x") {
-        const sign = block.userData.slot === 0 ? -1 : (block.userData.slot === 2 ? 1 : (camera.position.x >= 0 ? 1 : -1));
-        pullDir.set(sign, 0, 0);
-      } else {
-        const sign = block.userData.slot === 0 ? -1 : (block.userData.slot === 2 ? 1 : (camera.position.z >= 0 ? 1 : -1));
-        pullDir.set(0, 0, sign);
+    function drawPoly(points, fill, stroke=null) {
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 1;
+        ctx.stroke();
       }
-      pullDir.normalize();
+    }
 
-      const targetLayer = towerState.nextPlacementLayer;
-      const targetSlot = towerState.nextPlacementSlot;
-      const targetOrientation = towerState.nextPlacementOrientation;
-      const targetPos = blockPosition(targetLayer, targetSlot, targetOrientation);
-      const liftPos = startPos.clone().add(pullDir.clone().multiplyScalar(2.2)).setY(startPos.y + 1.4);
-      const travelPos = targetPos.clone().setY(targetPos.y + 1.8);
-      const targetRot = targetOrientation === "x" ? 0 : Math.PI / 2;
+    function pointInPoly(poly, x, y) {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i].x, yi = poly[i].y;
+        const xj = poly[j].x, yj = poly[j].y;
+        const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-9) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
 
-      const phases = [
-        { from:0.00, to:0.26, update:(t)=>{
-          block.position.lerpVectors(startPos, liftPos, ease(t));
-          block.rotation.y = THREE.MathUtils.lerp(startRot, startRot + 0.08 * Math.sign(pullDir.x + pullDir.z || 1), ease(t));
-        }},
-        { from:0.26, to:0.78, update:(t)=>{
-          block.position.lerpVectors(liftPos, travelPos, ease(t));
-          block.rotation.y = THREE.MathUtils.lerp(startRot + 0.08, targetRot, ease(t));
-        }},
-        { from:0.78, to:1.00, update:(t)=>{
-          block.position.lerpVectors(travelPos, targetPos, ease(t));
-          block.rotation.y = THREE.MathUtils.lerp(targetRot, targetRot, ease(t));
-        }},
+    function drawShadow() {
+      const center = project(0, 0, 0, state.yaw);
+      ctx.save();
+      const grad = ctx.createRadialGradient(center.x, center.y + 14, 20, center.x, center.y + 14, canvas.width * 0.18);
+      grad.addColorStop(0, "rgba(0,0,0,0.25)");
+      grad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.ellipse(center.x, center.y + 20, canvas.width * 0.18, canvas.height * 0.07, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function woodColors(strong=false, hover=false) {
+      if (strong) return { top:"#f0b36d", front:"#d28a4d", side:"#b06d3a", line:"rgba(255,255,255,.35)" };
+      if (hover) return { top:"#df9d5f", front:"#c68145", side:"#a56837", line:"rgba(255,255,255,.24)" };
+      return { top:"#c8894f", front:"#ad6f3b", side:"#8f582f", line:"rgba(255,255,255,.12)" };
+    }
+
+    function drawBlock(b) {
+      const v = blockVertices(b);
+      const top = [v[3], v[2], v[6], v[7]];
+      const front = [v[0], v[1], v[2], v[3]];
+      const side = [v[1], v[5], v[6], v[2]];
+      const leftSide = [v[0], v[4], v[7], v[3]];
+      const back = [v[4], v[5], v[6], v[7]];
+
+      const c = woodColors(b.selected, state.hoverId === b.id || b.eligible);
+
+      const faces = [
+        { poly: back, fill: "rgba(70,42,22,.18)" },
+        { poly: leftSide, fill: c.side },
+        { poly: side, fill: c.side },
+        { poly: front, fill: c.front },
+        { poly: top, fill: c.top, stroke: c.line }
       ];
 
-      const duration = 1150;
+      if (b.eligible) {
+        const center = top.reduce((acc,p)=>({x:acc.x+p.x/4,y:acc.y+p.y/4}), {x:0,y:0});
+        const glow = ctx.createRadialGradient(center.x, center.y, 2, center.x, center.y, 52);
+        glow.addColorStop(0, b.selected ? "rgba(255,120,190,.32)" : "rgba(255,255,255,.22)");
+        glow.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.ellipse(center.x, center.y, 52, 28, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      faces.forEach(f => drawPoly(f.poly, f.fill, f.stroke));
+
+      if (b.selected) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(255,184,230,.85)";
+        ctx.lineWidth = 2;
+        drawPoly(top, "rgba(0,0,0,0)", "rgba(255,184,230,.85)");
+        ctx.restore();
+      }
+    }
+
+    function depthFor(b) {
+      return project(b.x, b.y, b.z, state.yaw).depth;
+    }
+
+    function drawBackground() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, "rgba(255,255,255,.03)");
+      g.addColorStop(1, "rgba(0,0,0,.08)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < 10; i++) {
+        const y = canvas.height * (0.70 + i * 0.03);
+        ctx.strokeStyle = `rgba(255,255,255,${0.03 - i * 0.002})`;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+
+    function draw() {
+      drawBackground();
+      drawShadow();
+
+      const visible = tower.filter(b => b.active || b.moving).slice().sort((a,b) => depthFor(a) - depthFor(b));
+      visible.forEach(drawBlock);
+    }
+
+    function animateToTop(block) {
+      if (animating) return;
+      animating = true;
+      block.moving = true;
+      block.eligible = false;
       const start = performance.now();
 
-      function step(now){
-        const p = Math.min(1, (now - start) / duration);
-        const phase = phases.find(ph => p >= ph.from && p <= ph.to) || phases[phases.length - 1];
-        const localT = (p - phase.from) / (phase.to - phase.from);
-        phase.update(Math.max(0, Math.min(1, localT)));
+      const sx = block.x, sy = block.y, sz = block.z;
+      const startOri = block.ori;
+      const pull = startOri === "x"
+        ? { x: block.slot === 0 ? -2.0 : block.slot === 2 ? 2.0 : (Math.cos(state.yaw) > 0 ? 2.0 : -2.0), z: 0 }
+        : { x: 0, z: block.slot === 0 ? -2.0 : block.slot === 2 ? 2.0 : (Math.sin(state.yaw) > 0 ? 2.0 : -2.0) };
 
-        if (p < 1) {
-          requestAnimationFrame(step);
+      const tx0 = sx + pull.x;
+      const tz0 = sz + pull.z;
+      const ty0 = sy + 1.8;
+
+      const targetLayer = state.nextLayer;
+      const targetSlot = state.nextSlot;
+      const targetOri = state.nextOri;
+      const tpos = initialPos(targetLayer, targetSlot, targetOri);
+
+      function ease(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
+
+      function frame(now) {
+        let p = Math.min(1, (now - start) / state.moveDuration);
+        if (p < 0.28) {
+          const t = ease(p / 0.28);
+          block.x = sx + (tx0 - sx) * t;
+          block.y = sy + (ty0 - sy) * t;
+          block.z = sz + (tz0 - sz) * t;
+        } else if (p < 0.80) {
+          const t = ease((p - 0.28) / 0.52);
+          block.x = tx0 + (tpos.x - tx0) * t;
+          block.y = ty0 + (tpos.y + 1.6 - ty0) * t;
+          block.z = tz0 + (tpos.z - tz0) * t;
         } else {
-          block.userData.layer = targetLayer;
-          block.userData.slot = targetSlot;
-          block.userData.orientation = targetOrientation;
-          block.userData.id = `L${targetLayer+1}-${targetSlot+1}`;
-          block.userData.moving = false;
-          block.position.copy(targetPos);
-          block.rotation.y = targetRot;
+          const t = ease((p - 0.80) / 0.20);
+          block.x = tpos.x;
+          block.y = (tpos.y + 1.6) + (tpos.y - (tpos.y + 1.6)) * t;
+          block.z = tpos.z;
+        }
+        draw();
+        if (p < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          block.layer = targetLayer;
+          block.slot = targetSlot;
+          block.ori = targetOri;
+          block.id = `L${targetLayer+1}-${targetSlot+1}`;
+          block.x = tpos.x; block.y = tpos.y; block.z = tpos.z;
+          block.moving = false;
 
-          if (towerState.nextPlacementSlot < 2) {
-            towerState.nextPlacementSlot += 1;
+          if (state.nextSlot < 2) {
+            state.nextSlot += 1;
           } else {
-            towerState.nextPlacementLayer += 1;
-            towerState.nextPlacementSlot = 0;
-            towerState.nextPlacementOrientation = towerState.nextPlacementOrientation === "x" ? "z" : "x";
+            state.nextLayer += 1;
+            state.nextSlot = 0;
+            state.nextOri = state.nextOri === "x" ? "z" : "x";
           }
-          towerState.maxLayer = Math.max(towerState.maxLayer, towerState.nextPlacementLayer);
 
+          updateEligible();
           const type = pickMissionType();
           const source = type === "TRUTH" ? truths[getLevelIndex(truths)] : dares[getLevelIndex(dares)];
           setMission(type, randItem(source));
-          addRecent(`${currentPlayer()} · ${type} · ${block.userData.id}`);
+          addRecent(`${currentPlayer()} · ${type} · ${block.id}`);
           updateProgress();
           nextPlayer();
           animating = false;
-          updateEligibleBlocks();
+          draw();
         }
       }
-      requestAnimationFrame(step);
+      requestAnimationFrame(frame);
     }
 
-    function ease(t){
-      return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+    function pickMissionType() {
+      const truthChance = level === 1 ? 0.6 : level === 2 ? 0.5 : 0.42;
+      return Math.random() < truthChance ? "TRUTH" : "DARE";
     }
 
-    // Pointer picking
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-    let hoverBlock = null;
-
-    function setPointerFromEvent(event){
+    function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width;
-      const y = (event.clientY - rect.top) / rect.height;
-      pointer.x = x * 2 - 1;
-      pointer.y = -(y * 2 - 1);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
     }
 
-    function handlePointerMove(event){
-      setPointerFromEvent(event);
-      raycaster.setFromCamera(pointer, camera);
-      const hits = raycaster.intersectObjects(blocks, false);
-      const nextHover = hits.find(hit => hit.object.userData.eligible)?.object || null;
+    function canvasXY(e) {
+      const rect = canvas.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
 
-      if (hoverBlock && hoverBlock !== nextHover) {
-        hoverBlock.scale.set(1,1,1);
+    function hitTest(x, y) {
+      const order = tower.filter(b => b.active && (b.eligible || b.selected)).slice().sort((a,b) => depthFor(b) - depthFor(a));
+      for (const b of order) {
+        const v = blockVertices(b);
+        const top = [v[3], v[2], v[6], v[7]];
+        const front = [v[0], v[1], v[2], v[3]];
+        const side = [v[1], v[5], v[6], v[2]];
+        const leftSide = [v[0], v[4], v[7], v[3]];
+        if (pointInPoly(top, x, y) || pointInPoly(front, x, y) || pointInPoly(side, x, y) || pointInPoly(leftSide, x, y)) {
+          return b;
+        }
       }
-      if (nextHover && nextHover !== hoverBlock) {
-        nextHover.scale.set(1.03, 1.03, 1.03);
+      return null;
+    }
+
+    canvas.addEventListener("pointerdown", (e) => {
+      state.dragging = true;
+      state.dragMoved = false;
+      state.dragStartX = e.clientX;
+      state.dragStartYaw = state.yaw;
+    });
+    window.addEventListener("pointermove", (e) => {
+      if (state.dragging) {
+        const dx = e.clientX - state.dragStartX;
+        if (Math.abs(dx) > 3) state.dragMoved = true;
+        state.yaw = state.dragStartYaw + dx * 0.01;
+        draw();
+      } else {
+        const p = canvasXY(e);
+        const hit = hitTest(p.x, p.y);
+        state.hoverId = hit ? hit.id : null;
+        draw();
       }
-      hoverBlock = nextHover;
-    }
+    });
+    window.addEventListener("pointerup", (e) => {
+      if (!state.dragging) return;
+      const wasClick = !state.dragMoved;
+      state.dragging = false;
+      if (wasClick && !animating) {
+        const p = canvasXY(e);
+        const hit = hitTest(p.x, p.y);
+        if (hit && hit.eligible) animateToTop(hit);
+      }
+    });
 
-    function handleClick(event){
+    document.getElementById("autoPickBtn").addEventListener("click", () => {
       if (animating) return;
-      setPointerFromEvent(event);
-      raycaster.setFromCamera(pointer, camera);
-      const hits = raycaster.intersectObjects(blocks, false);
-      const picked = hits.find(hit => hit.object.userData.eligible)?.object;
-      if (picked) animateBlockToTop(picked);
-    }
-
-    canvas.addEventListener("pointermove", handlePointerMove);
-    canvas.addEventListener("click", handleClick);
-
-    document.getElementById("autoPickBtn").addEventListener("click", ()=>{
-      if (animating) return;
-      const eligible = blocks.filter(b => b.userData.eligible);
+      const eligible = tower.filter(b => b.eligible);
       if (!eligible.length) {
         setMission("INFO", "더는 안전하게 뽑을 블록이 없어 보여. 처음부터 다시 시작해.");
         return;
       }
-      animateBlockToTop(randItem(eligible));
+      const preferred = eligible.find(b => b.selected) || randItem(eligible);
+      animateToTop(preferred);
     });
 
-    document.getElementById("missionOnlyBtn").addEventListener("click", ()=>{
+    document.getElementById("missionOnlyBtn").addEventListener("click", () => {
       const type = pickMissionType();
       const source = type === "TRUTH" ? truths[getLevelIndex(truths)] : dares[getLevelIndex(dares)];
       setMission(type, randItem(source), "탑을 건드리지 않고 미션만 진행하는 라운드야.");
@@ -888,53 +801,36 @@ html = r'''<!DOCTYPE html>
       nextPlayer();
     });
 
-    document.getElementById("penaltyBtn").addEventListener("click", ()=>{
+    document.getElementById("penaltyBtn").addEventListener("click", () => {
       setMission("PENALTY", randItem(penalties), "벌칙이 끝나면 다음 사람 차례.");
       addRecent(`${currentPlayer()} · 벌칙`);
       nextPlayer();
     });
 
-    document.getElementById("resetBtn").addEventListener("click", ()=>{
-      level = 1;
-      count = 0;
-      moves = 0;
-      currentPlayerIndex = 0;
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      level = 1; count = 0; moves = 0; currentPlayerIndex = 0; animating = false;
       levelEl.textContent = "1";
       countEl.textContent = "0";
       movesEl.textContent = "0";
       modeEl.textContent = "START";
       missionTagEl.textContent = "준비 완료";
       missionTextEl.textContent = "탑에서 밝게 표시되는 블록을 하나 눌러 시작해.";
-      missionSubEl.textContent = "실제 젠가 규칙처럼 최상단의 완성 층 아래 블록들만 뽑히게 제한했어. 블록을 뽑으면 자동으로 맨 위에 다시 올라가.";
+      missionSubEl.textContent = "실제 젠가 규칙처럼 최상단의 완성 층 아래 블록들만 뽑히게 제한했어. 블록을 뽑으면 자동으로 맨 위에 다시 올라간다.";
       recentEl.innerHTML = '<div class="chip">아직 없음</div>';
       updatePlayerUI();
-      buildInitialTower();
+      createTower();
     });
 
-    function resize(){
-      const rect = canvas.getBoundingClientRect();
-      renderer.setSize(rect.width, rect.height, false);
-      camera.aspect = rect.width / rect.height;
-      camera.updateProjectionMatrix();
-    }
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", resizeCanvas);
 
-    buildInitialTower();
     updatePlayerUI();
-    resize();
-
-    function render(){
-      controls.update();
-      renderer.render(scene, camera);
-      requestAnimationFrame(render);
-    }
-    render();
-
+    createTower();
+    resizeCanvas();
   </script>
 </body>
 </html>
-'''
+"""
 
-path = Path('/mnt/data/index_real_jenga.html')
-path.write_text(html, encoding='utf-8')
+path = Path("/mnt/data/index_jenga_nocdn.html")
+path.write_text(html, encoding="utf-8")
 print(path)
